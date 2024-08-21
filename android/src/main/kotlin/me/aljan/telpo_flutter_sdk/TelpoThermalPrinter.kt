@@ -290,7 +290,11 @@ class TelpoThermalPrinter(activity: TelpoFlutterSdkPlugin) {
         val columnsWidth = data["columnsWidth"] as ArrayList<Int>
         val columnsAlignment = data["columnsAlignment"] as ArrayList<Int>
         val textSize = data["columnsTextSize"] as Int
+        val isBold = data["isBold"] as? Boolean ?: false
+        val gray = data["gray"]?.toString()?.toIntOrNull()?.coerceIn(0, 12) ?: 5
 
+        mUsbThermalPrinter?.setBold(isBold)
+        mUsbThermalPrinter?.setGray(gray)
         mUsbThermalPrinter?.addColumnsString(
             columnsText.toTypedArray(),
             columnsWidth.toIntArray(),

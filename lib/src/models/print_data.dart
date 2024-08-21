@@ -1,3 +1,9 @@
+/// [Enum] representing printable element type.
+enum _PrintDataType { byte, text, space, columns }
+
+/// Plain Old Dart Object representing printing data.
+///
+/// Types: [PrintData.text], [PrintData.byte], [PrintData.space], [PrintData.columns]
 class PrintData {
   final dynamic _data;
   final double? _width;
@@ -52,6 +58,8 @@ class PrintData {
     required List<int> columnsWidth,
     required List<int> columnsAlignment,
     required int columnsTextSize,
+    bool isBold = false,
+    int? gray,
   }) {
     return PrintData._(
       _PrintDataType.columns,
@@ -59,13 +67,17 @@ class PrintData {
       null,
       null,
       null,
-      null,
-      null,
+      isBold,
+      _clampGray(gray),
       columnsText,
       columnsWidth,
       columnsAlignment,
       columnsTextSize,
     );
+  }
+
+  factory PrintData.space({required int line}) {
+    return PrintData._(_PrintDataType.space, line);
   }
 
   static int? _clampFontSize(int? fontSize) {
