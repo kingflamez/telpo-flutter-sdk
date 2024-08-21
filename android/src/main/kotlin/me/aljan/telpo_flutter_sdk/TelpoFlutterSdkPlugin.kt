@@ -90,6 +90,11 @@ class TelpoFlutterSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
                 telpoThermalPrinter.print(resultWrapper, printDataList, lowBattery)
             }
+            "setAlignment" -> {
+                val alignment = call.argument<String>("alignment")
+                telpoThermalPrinter.setAlignment(alignment)
+                resultWrapper.success(true)
+            }
             else -> {
                 resultWrapper.notImplemented()
             }

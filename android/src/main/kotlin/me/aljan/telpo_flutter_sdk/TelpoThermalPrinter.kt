@@ -191,6 +191,9 @@ class TelpoThermalPrinter(activity: TelpoFlutterSdkPlugin) {
 
                             mUsbThermalPrinter?.walkPaper(step)
                         }
+                        PrintType.Columns -> {
+                            printColumns(data)
+                        }
                     }
                 }
             } catch (e: Exception) {
@@ -237,8 +240,15 @@ class TelpoThermalPrinter(activity: TelpoFlutterSdkPlugin) {
     private fun printText(data: Map<String, Any>) {
         val text = data["data"].toString()
         val alignment = utils.getAlignment(data["alignment"].toString())
-        val fontSize = utils.getFontSize(data["fontSize"].toString())
+        val isBold = data["isBold"] as? Boolean ?: false
+        val gray = data["gray"]?.toString()?.toIntOrNull()?.coerceIn(0, 12) ?: 5 
+        var fontSize = data["fontSize"]?.toString()?.toIntOrNull() ?: 18
 
+        // Ensure the font size is within the valid range
+        fontSize = fontSize.coerceIn(8, 64)
+
+        mUsbThermalPrinter?.setBold(isBold)
+        mUsbThermalPrinter?.setGray(gray)
         mUsbThermalPrinter?.setTextSize(fontSize)
         mUsbThermalPrinter?.setAlgin(alignment)
         mUsbThermalPrinter?.addString(text)
@@ -248,9 +258,22 @@ class TelpoThermalPrinter(activity: TelpoFlutterSdkPlugin) {
         return
     }
 
+    private fun setAlignment(alignment: String?) {
+    val mode = when (alignment) {
+        "left" -> UsbThermalPrinter.ALGIN_LEFT
+        "center" -> UsbThermalPrinter.ALGIN_MIDDLE
+        "right" -> UsbThermalPrinter.ALGIN_RIGHT
+        else -> UsbThermalPrinter.ALGIN_LEFT
+    }
+
+    mUsbThermalPrinter?.setAlgin(mode)
+}
+
     private fun printByte(data: Map<String, Any>) {
         val value = data["data"] as ArrayList<*>
+        val gray = data["gray"]?.toString()?.toIntOrNull()?.coerceIn(0, 12) ?: 5
 
+        mUsbThermalPrinter?.setGray(gray)
         for (bitmap in value) {
             val bmp = utils.createByteImage(bitmap as ByteArray)
 
@@ -258,6 +281,24 @@ class TelpoThermalPrinter(activity: TelpoFlutterSdkPlugin) {
         }
 
         mUsbThermalPrinter?.printString()
+        result?.success(true)
+        return
+    }
+
+    private fun printColumns(data: Map<String, Any>) {
+        val columnsText = data["columnsText"] as ArrayList<String>
+        val columnsWidth = data["columnsWidth"] as ArrayList<Int>
+        val columnsAlignment = data["columnsAlignment"] as ArrayList<Int>
+        val textSize = data["columnsTextSize"] as Int
+
+        mUsbThermalPrinter?.addColumnsString(
+            columnsText.toTypedArray(),
+            columnsWidth.toIntArray(),
+            columnsAlignment.toIntArray(),
+            textSize
+        )
+        mUsbThermalPrinter?.printString()
+
         result?.success(true)
         return
     }

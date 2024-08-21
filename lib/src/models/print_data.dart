@@ -1,23 +1,18 @@
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:telpo_flutter_sdk/telpo_flutter_sdk.dart';
-
-/// [Enum] representing printable element type.
-enum _PrintDataType { byte, text, space }
-
-/// Plain Old Dart Object representing printing data.
-///
-/// Types: [PrintData.text], [PrintData.byte], [PrintData.space]
 class PrintData {
   final dynamic _data;
   final double? _width;
   final double? _height;
   final PrintAlignment? _alignment;
-  final PrintedFontSize? _fontSize;
+  final int? _fontSize;
+  final bool? _isBold;
+  final int? _gray;
+  final List<String>? _columnsText;
+  final List<int>? _columnsWidth;
+  final List<int>? _columnsAlignment;
+  final int? _columnsTextSize;
 
   final _PrintDataType _type;
 
-  /// [PrintData] can be initialized through factory constructors: text, byte, space.
   const PrintData._(
     this._type,
     this._data, [
@@ -25,14 +20,20 @@ class PrintData {
     this._height,
     this._alignment,
     this._fontSize,
+    this._isBold,
+    this._gray,
+    this._columnsText,
+    this._columnsWidth,
+    this._columnsAlignment,
+    this._columnsTextSize,
   ]);
 
-  /// PrintData from text. Optional alignment (PrintAlignment) and fontSize
-  /// (PrintedFontSize) can be assigned for styling.
   factory PrintData.text(
     String text, {
     PrintAlignment? alignment,
-    PrintedFontSize? fontSize,
+    int? fontSize,
+    bool isBold = false,
+    int? gray,
   }) {
     return PrintData._(
       _PrintDataType.text,
@@ -40,38 +41,43 @@ class PrintData {
       null,
       null,
       alignment,
-      fontSize,
+      _clampFontSize(fontSize),
+      isBold,
+      _clampGray(gray),
     );
   }
 
-  /// PrintData for spacing, can be considered as [SizedBox] from Flutter
-  /// Widgets.
-  ///
-  /// line property represents count of lines to be inserted.
-  factory PrintData.space({required int line}) {
-    return PrintData._(_PrintDataType.space, line);
-  }
-
-  /// PrintData from list of bytes where bytesList property can be comprised of
-  /// one or multiple elements.
-  factory PrintData.byte({
-    required List<Uint8List?> bytesList,
-    double? width,
-    double? height,
-    PrintAlignment? alignment,
-    PrintedFontSize? fontSize,
+  factory PrintData.columns({
+    required List<String> columnsText,
+    required List<int> columnsWidth,
+    required List<int> columnsAlignment,
+    required int columnsTextSize,
   }) {
     return PrintData._(
-      _PrintDataType.byte,
-      bytesList,
-      width,
-      height,
-      alignment,
-      fontSize,
+      _PrintDataType.columns,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      columnsText,
+      columnsWidth,
+      columnsAlignment,
+      columnsTextSize,
     );
   }
 
-  /// Data is being transferred to the plugin as JSON.
+  static int? _clampFontSize(int? fontSize) {
+    if (fontSize == null) return null;
+    return fontSize.clamp(8, 64);
+  }
+
+  static int? _clampGray(int? gray) {
+    if (gray == null) return null;
+    return gray.clamp(0, 12);
+  }
+
   Map<String, dynamic> toJson() {
     return {
       "data": _data,
@@ -79,19 +85,31 @@ class PrintData {
       "height": _height,
       "alignment": _alignment?.name,
       "type": _type.name,
-      "fontSize": _fontSize?.name,
+      "fontSize": _fontSize,
+      "isBold": _isBold,
+      "gray": _gray,
+      "columnsText": _columnsText,
+      "columnsWidth": _columnsWidth,
+      "columnsAlignment": _columnsAlignment,
+      "columnsTextSize": _columnsTextSize,
     };
   }
 
-  /// Stringifying [PrintData] object.
   @override
   String toString() {
-    return '''PrintModel(
+    return '''PrintData(
       data: $_data,
       width: $_width,
       height: $_height,
-      alignment: $_alignment
+      alignment: $_alignment,
       type: $_type,
-      fontSize: $_fontSize)''';
+      fontSize: $_fontSize,
+      isBold: $_isBold,
+      gray: $_gray,
+      columnsText: $_columnsText,
+      columnsWidth: $_columnsWidth,
+      columnsAlignment: $_columnsAlignment,
+      columnsTextSize: $_columnsTextSize,
+    )''';
   }
 }

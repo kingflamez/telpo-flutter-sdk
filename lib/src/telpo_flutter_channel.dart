@@ -110,4 +110,15 @@ class TelpoFlutterChannel {
       }
     }
   }
+
+  /// [alignment] should be one of the values defined in the [PrintAlignment] enum.
+  Future<void> setAlignment(PrintAlignment alignment) async {
+    try {
+      await _platform.invokeMethod('setAlignment', {
+        'alignment': alignment.name,
+      });
+    } catch (e) {
+      log('TELPO EXCEPTION: $e');
+    }
+  }
 }
